@@ -1,0 +1,35 @@
+server:
+  #服务端口
+  port: 9000
+
+spring:
+  application:
+    #服务名称
+    name: eureka-server-standalone
+
+#Eureka Standalone配置
+eureka:
+
+  instance:
+    #服务器在收到最后一次心跳之后等待的持续时间(缺省值90s)，然后才能从其注册表中删除实例
+    lease-expiration-duration-in-seconds: 90
+
+  client:
+    #是否将自己作为客户端注册到注册中心(缺省true), 单点设置为false
+    register-with-eureka: false
+
+    #是否从注册中心获取注册信息(缺省true), 单点设置为false
+    fetch-registry: false
+
+    #service-url:
+    #  defaultZone: http://localhost:${server.port}/eureka/
+
+  server:
+    #是否开启自我保护模式(缺省true), 开发阶段建议设置为false
+    enable-self-preservation: false
+
+    #调度程序EvictionTask会比较这两个值并确定系统是否处于自我保存模式。
+    #这个调度程序以eviction-interval-timer-in-ms（缺省为60*1000ms）
+    #定义的时间频率运行并删除过期的实例，但它会在删除之前检查系统是否已
+    #达到自我保护模式（通过比较实际和预期的心跳）。
+    eviction-interval-timer-in-ms: 10000
