@@ -1,0 +1,98 @@
+config:
+  #集群地址列表
+  serverA: 192.168.0.100
+  serverB: 192.168.0.101
+  serverC: 192.168.0.102
+
+spring:
+  application:
+    #服务名称
+    name: eureka-server-ha
+
+server:
+  #服务端口
+  port: 9000
+
+#Eureka配置
+eureka:
+
+  instance:
+    #是否注册时使用IP地址(缺省为false)
+    prefer-ip-address: true
+
+    #Client向Server发送心跳的频率(缺省值30s)
+    lease-renewal-interval-in-seconds: 30
+
+    #服务器在收到最后一次心跳之后等待的持续时间(缺省值90s)，然后才能从其注册表中删除实例
+    lease-expiration-duration-in-seconds: 90
+
+  client:
+    #是否将自己作为客户端注册到注册中心(缺省true), 单点设置为false
+    register-with-eureka: true
+
+    #是否从注册中心获取注册信息(缺省true), 单点设置为false
+    fetch-registry: true
+
+    #从注册中心获取注册信息的间隔时间(缺省30s)
+    registry-fetch-interval-seconds: 30
+
+  server:
+    #是否开启自我保护模式(缺省true), 开发阶段建议设置为false
+    enable-self-preservation: false
+
+    #调度程序EvictionTask会比较这两个值并确定系统是否处于自我保存模式。
+    #这个调度程序以eviction-interval-timer-in-ms（缺省为60*1000ms）
+    #定义的时间频率运行并删除过期的实例，但它会在删除之前检查系统是否已
+    #达到自我保护模式（通过比较实际和预期的心跳）。
+    eviction-interval-timer-in-ms: 10000
+
+---
+
+spring:
+  profiles: eureka-server-A
+
+#Eureka配置
+eureka:
+
+  instance:
+    #设置注册中心微服务名(默认为：机器主机名:应用名称:应用端口)
+    instance-id: ${config.serverA}
+
+  client:
+    service-url:
+      defaultZone: "http://${config.serverB}:${config.portB}/eureka/, \
+                    http://${config.serverC}:${config.portC}/eureka/"
+
+---
+
+spring:
+  profiles: eureka-server-B
+
+#Eureka配置
+eureka:
+
+  instance:
+    #设置注册中心微服务名(默认为：机器主机名:应用名称:应用端口)
+    instance-id: ${config.serverB}
+
+  client:
+    service-url:
+      defaultZone: "http://${config.serverA}:${config.portA}/eureka/, \
+                    http://${config.serverC}:${config.portC}/eureka/"
+
+---
+
+spring:
+  profiles: eureka-server-C
+
+#Eureka配置
+eureka:
+
+  instance:
+    #设置注册中心微服务名(默认为：机器主机名:应用名称:应用端口)
+    instance-id: ${config.serverC}
+
+  client:
+    service-url:
+      defaultZone: "http://${config.serverA}:${config.portA}/eureka/, \
+                    http://${config.serverB}:${config.portB}/eureka/"
