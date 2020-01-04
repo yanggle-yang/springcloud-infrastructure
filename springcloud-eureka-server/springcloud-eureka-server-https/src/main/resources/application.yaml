@@ -1,0 +1,165 @@
+config:
+  eureka:
+    #集群地址列表
+    serverA: server-A
+    serverB: server-B
+    serverC: server-C
+
+    #集群端口列表
+    portA: 9001
+    portB: 9002
+    portC: 9003
+
+  ssl:
+    client:
+      key-store: client.p12
+      key-store-password: client
+    server:
+      key-store: classpath:server.p12
+      key-alias: server
+      key-store-type: PKCS12
+      key-store-password: server
+
+spring:
+  application:
+    #服务名称
+    name: eureka-server-https
+
+server:
+  #SSL配置
+  ssl:
+    #是否开启SSL认证
+    enabled: true
+    #证书存放路径
+    key-store: ${config.ssl.server.key-store}
+    #证书别名
+    key-alias: ${config.ssl.server.key-alias}
+    #证书存储类型
+    key-store-type: ${config.ssl.server.key-store-type}
+    #证书密码
+    key-store-password: ${config.ssl.server.key-store-password}
+
+#Eureka配置
+eureka:
+
+  instance:
+    #是否注册时使用IP地址(缺省为false)
+    prefer-ip-address: false
+
+    #Client向Server发送心跳的频率(缺省值30s)
+    lease-renewal-interval-in-seconds: 30
+
+    #服务器在收到最后一次心跳之后等待的持续时间(缺省值90s)，然后才能从其注册表中删除实例
+    lease-expiration-duration-in-seconds: 90
+
+    #是否启用安全端口
+    secure-port-enabled: true
+
+    #是否启用非安全端口
+    non-secure-port-enabled: false
+
+  client:
+    #是否将自己作为客户端注册到注册中心(缺省true), 单点设置为false
+    register-with-eureka: true
+
+    #是否从注册中心获取注册信息(缺省true), 单点设置为false
+    fetch-registry: true
+
+    #从注册中心获取注册信息的间隔时间(缺省30s)
+    registry-fetch-interval-seconds: 30
+
+  server:
+    #是否开启自我保护模式(缺省true), 开发阶段建议设置为false
+    enable-self-preservation: false
+
+    #调度程序EvictionTask会比较这两个值并确定系统是否处于自我保存模式。
+    #这个调度程序以eviction-interval-timer-in-ms（缺省为60*1000ms）
+    #定义的时间频率运行并删除过期的实例，但它会在删除之前检查系统是否已
+    #达到自我保护模式（通过比较实际和预期的心跳）。
+    eviction-interval-timer-in-ms: 10000
+
+---
+
+#服务名称
+spring:
+  profiles: eureka-server-A
+
+server:
+  #服务端口
+  port: ${config.eureka.portA}
+
+#Eureka配置
+eureka:
+
+  instance:
+    #主机名称
+    hostname: ${config.eureka.serverA}
+
+    #设置注册中心微服务名(默认为：机器主机名:应用名称:应用端口)
+    instance-id: ${eureka.instance.hostname}:${server.port}
+
+    #安全端口
+    secure-port: ${server.port}
+
+  client:
+    service-url:
+      defaultZone: https://${config.eureka.serverB}:${config.eureka.portB}/eureka/
+      #defaultZone: "https://${config.eureka.serverB}:${config.eureka.portB}/eureka/, \
+      #              https://${config.eureka.serverC}:${config.eureka.portC}/eureka/"
+
+---
+
+#服务名称
+spring:
+  profiles: eureka-server-B
+
+server:
+  #服务端口
+  port: ${config.eureka.portB}
+
+#Eureka配置
+eureka:
+
+  instance:
+    #主机名称
+    hostname: ${config.eureka.serverB}
+
+    #设置注册中心微服务名(默认为：机器主机名:应用名称:应用端口)
+    instance-id: ${eureka.instance.hostname}:${server.port}
+
+    #安全端口
+    secure-port: ${server.port}
+
+  client:
+    service-url:
+      defaultZone: https://${config.eureka.serverA}:${config.eureka.portA}/eureka/
+      #defaultZone: "https://${config.eureka.serverA}:${config.eureka.portA}/eureka/, \
+      #              https://${config.eureka.serverC}:${config.eureka.portC}/eureka/"
+
+---
+
+#服务名称
+spring:
+  profiles: eureka-server-C
+
+server:
+  #服务端口
+  port: ${config.eureka.portC}
+
+#Eureka配置
+eureka:
+
+  instance:
+    #主机名称
+    hostname: ${config.eureka.serverC}
+
+    #设置注册中心微服务名(默认为：机器主机名:应用名称:应用端口)
+    instance-id: ${eureka.instance.hostname}:${server.port}
+
+    #安全端口
+    secure-port: ${server.port}
+
+  client:
+    service-url:
+      defaultZone: "https://${config.eureka.serverA}:${config.eureka.portA}/eureka/, \
+                    https://${config.eureka.serverB}:${config.eureka.portB}/eureka/"
