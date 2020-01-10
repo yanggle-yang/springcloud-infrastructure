@@ -1,0 +1,66 @@
+config:
+  # 集群地址列表
+  serverA: eureka-server-9001
+  serverB: eureka-server-9002
+  serverC: eureka-server-9003
+
+  # 集群端口列表
+  portA: 9001
+  portB: 9002
+  portC: 9003
+
+spring:
+  application:
+    name: config-server #服务名称
+  cloud:
+    config:
+      server:
+        git:
+          # 配置文件只搜索url目录下的searchPaths
+          uri: https://github.com/yanggle-yang/springcloud-infrastructure.git
+          # 指定搜索路径，如果有多个路径则使用,分隔
+          searchPaths: config/
+          # 对于使用git,svn做为后端配置，从远程库获取配置文件，需要存储到本地文件
+          basedir: c:/springcloud-config
+          # 配置中心通过git从远程git库，有时本地的拷贝被污染，这时配置中心无法从远
+          # 程库更新本地配置,设置force-pull=true，则强制从远程库中更新本地库
+          force-pull: true
+          #username: username
+          #password: password
+server:
+  port: 9009 #服务端口
+
+# Eureka配置
+eureka:
+  instance:
+    # 是否微服务调用地址为IP优先(缺省值false)
+    prefer-ip-address: false
+
+    # 主机名称
+    #hostname: ${config.serverA}
+
+    # 设置机器IP
+    ip-address: 127.0.0.1
+
+    # 设置注册中心微服务名(默认为：机器主机名:应用名称:应用端口)
+    #instance-id: ${eureka.instance.hostname}:${server.port}
+    instance-id: ${eureka.instance.ip-address}:${server.port}
+
+    # 客户端向服务器发送心跳的频率(缺省值30s)
+    lease-renewal-interval-in-seconds: 30
+
+  client:
+    # 是否将自己作为客户端注册到注册中心(缺省值true)
+    register-with-eureka: true
+
+    # 是否从注册中心获取注册信息(缺省值true)
+    fetch-registry: true
+
+    # 从注册中心获取注册信息的间隔时间(缺省值30s)
+    # 测试环境，可以适当提高Client端拉取Server注册信息的频率
+    registry-fetch-interval-seconds: 30
+
+    service-url:
+      defaultZone: "http://${config.serverA}:${config.portA}/eureka/, \
+                    http://${config.serverB}:${config.portB}/eureka/, \
+                    http://${config.serverC}:${config.portC}/eureka/"
